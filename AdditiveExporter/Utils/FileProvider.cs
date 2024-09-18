@@ -77,11 +77,9 @@ namespace AdditiveExporter.Utils
             else
             {
                 Logger.Log("Config file not found. Creating a default config.json file.", LogLevel.Cue4);
-
-                // Create default config in memory
+                
                 _config = new Config();
-
-                // Serialize and write the default config to a new config.json file
+                
                 var defaultConfigContent = JsonConvert.SerializeObject(_config, Formatting.Indented);
                 File.WriteAllText(configPath, defaultConfigContent);
 
@@ -105,7 +103,7 @@ namespace AdditiveExporter.Utils
             addUAnimSequence.RefPoseSeq = new ResolvedLoadedObject(refUAnimSequence);
             var exporterOptions = new ExporterOptions()
             {
-                AnimFormat = _config.AnimFormat // Set the AnimFormat based on the config file
+                AnimFormat = _config.AnimFormat
             };
             var exporter = new AnimExporter(addUAnimSequence, exporterOptions);
             exporter.TryWriteToDir(new DirectoryInfo(Constants.ExportPath), out var label, out var fileName);
@@ -116,10 +114,7 @@ namespace AdditiveExporter.Utils
 
         private static string EnsureCorrectPath(string inputPath)
         {
-            // Extract the file name from the last part of the path
             var fileName = Path.GetFileName(inputPath);
-
-            // If the file name does not contain a dot, append it as `.fileName.fileName`
             if (!fileName.Contains("."))
             {
                 inputPath = $"{inputPath}.{fileName}";

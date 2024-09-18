@@ -3,4 +3,5 @@ This software allows you to exports animations from the latest version of Fortni
 
 ## Credit
 [Fortnite Emote Exporter](https://github.com/0xkaede/FortniteEmoteExporter/tree/main) - Base code
+
 [CUE4Parse](https://github.com/FabianFG/CUE4Parse) - File parsing

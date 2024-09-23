@@ -33,7 +33,8 @@ namespace AdditiveExporter.Utils
                 Provider = new DefaultFileProvider(FortniteUtils.PaksPath, SearchOption.TopDirectoryOnly, false,
                     new VersionContainer(_config.UEVersion));
                 Provider.Initialize();
-
+                Logger.Log($"File provider initialized with at {FortniteUtils.PaksPath} with {_config.UEVersion}", LogLevel.Cfg);
+                
                 var keys = new List<KeyValuePair<FGuid, FAesKey>>
                 {
                     new KeyValuePair<FGuid, FAesKey>(new FGuid(), new FAesKey(aes.MainKey))
@@ -42,7 +43,8 @@ namespace AdditiveExporter.Utils
                 keys.AddRange(aes.DynamicKeys.Select(x =>
                     new KeyValuePair<FGuid, FAesKey>(new Guid(x.PakGuid), new FAesKey(x.Key))));
                 await Provider.SubmitKeysAsync(keys);
-                Logger.Log($"File provider initialized with {Provider.Keys.Count} keys", LogLevel.Cue4);
+                Logger.Log($"Loaded {Provider.Keys.Count} keys", LogLevel.Cue4);
+                Logger.Log($"AnimFormat set to {_config.AnimFormat}", LogLevel.Cfg);
 
                 var oodlePath = Path.Combine(Constants.DataPath, OodleHelper.OODLE_DLL_NAME);
                 if (File.Exists(OodleHelper.OODLE_DLL_NAME))
@@ -76,24 +78,24 @@ namespace AdditiveExporter.Utils
             }
             else
             {
-                Logger.Log("Config file not found. Creating a default config.json file.", LogLevel.Cue4);
+                Logger.Log("Config file not found. Creating a default config.json file.", LogLevel.Cfg);
                 
                 _config = new Config();
                 
                 var defaultConfigContent = JsonConvert.SerializeObject(_config, Formatting.Indented);
                 File.WriteAllText(configPath, defaultConfigContent);
 
-                Logger.Log("Default config.json file created.", LogLevel.Cue4);
+                Logger.Log("Default config.json file created.", LogLevel.Cfg);
             }
         }
 
         public static void ExportAdditiveAnimation()
         {
-            Console.WriteLine("Enter the path to the Additive Pose:");
+            Logger.Log("Enter the path to the Additive Pose:", LogLevel.Cue4);
             string additivePose = Console.ReadLine() ?? string.Empty;
             additivePose = EnsureCorrectPath(additivePose);
 
-            Console.WriteLine("Enter the path to the Ref Pose:");
+            Logger.Log("Enter the path to the Ref Pose:", LogLevel.Cue4);
             string refPose = Console.ReadLine() ?? string.Empty;
             refPose = EnsureCorrectPath(refPose);
 
@@ -137,7 +139,7 @@ namespace AdditiveExporter.Utils
             var path = Path.Combine(Constants.DataPath, mappingsData.FileName);
             if (!File.Exists(path))
             {
-                Logger.Log($"Cannot find latest mappings, Downloading {mappingsData.Url}", LogLevel.Cue4);
+                Logger.Log($"Cannot find latest mappings, Downloading {mappingsData.Url}", LogLevel.Cfg);
                 var wc = new WebClient();
                 wc.DownloadFile(new Uri(mappingsData.Url), path);
             }

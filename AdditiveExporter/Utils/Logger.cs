@@ -14,7 +14,7 @@ namespace AdditiveExporter.Utils
                 LogLevel.Info => ConsoleColor.Cyan,
                 LogLevel.Cue4 => ConsoleColor.DarkYellow,
                 LogLevel.Error => ConsoleColor.Red,
-
+                LogLevel.Cfg => ConsoleColor.Blue,
             };
 
             Console.Write(level.GetDescription());
@@ -47,6 +47,8 @@ namespace AdditiveExporter.Utils
 
         [Description("CUE4")] Cue4,
 
-        [Description("ERROR")] Error
+        [Description("ERROR")] Error,
+        
+        [Description("CFG")] Cfg
     }
 }

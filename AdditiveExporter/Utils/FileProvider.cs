@@ -11,6 +11,7 @@ using AdditiveExporter.Models;
 using CUE4Parse_Conversion;
 using CUE4Parse_Conversion.Animations;
 using CUE4Parse.Compression;
+using UE4Config.Hierarchy;
 
 namespace AdditiveExporter.Utils
 {
@@ -23,15 +24,14 @@ namespace AdditiveExporter.Utils
         {
             try
             {
-                // Load configuration
                 LoadConfig();
-
                 var aes = JsonConvert
                     .DeserializeObject<FortniteAPIResponse<AES>>(
-                        await new HttpClient().GetStringAsync("https://fortnite-api.com/v2/aes")).Data;
+                        await new HttpClient().GetStringAsync("https://fortnite-api.com/v2/aes"))
+                    ?.Data;
 
                 Provider = new DefaultFileProvider(FortniteUtils.PaksPath, SearchOption.TopDirectoryOnly, false,
-                    new VersionContainer(EGame.GAME_UE5_5));
+                    new VersionContainer(_config.UEVersion));
                 Provider.Initialize();
 
                 var keys = new List<KeyValuePair<FGuid, FAesKey>>

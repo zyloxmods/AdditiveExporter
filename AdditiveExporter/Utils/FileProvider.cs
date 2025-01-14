@@ -127,7 +127,7 @@ namespace AdditiveExporter.Utils
         
         private static async Task<FileUsmapTypeMappingsProvider> Mappings()
         {
-            var mappingsResponse = await new HttpClient().GetStringAsync("https://fortnitecentral.genxgames.gg/api/v1/mappings");
+            var mappingsResponse = await new HttpClient().GetStringAsync("https://fortniteporting.halfheart.dev/api/v3/mappings");
             var mappingsData = JsonConvert.DeserializeObject<List<MappingsResponse>>(mappingsResponse)?.FirstOrDefault();
 
             if (mappingsData == null)

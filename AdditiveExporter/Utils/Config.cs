@@ -8,9 +8,9 @@ namespace AdditiveExporter.Utils
     public class Config
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public EAnimFormat AnimFormat { get; set; } = EAnimFormat.ActorX;
+        public EAnimFormat AnimFormat { get; set; } = EAnimFormat.UEFormat;
 
         [JsonConverter(typeof(StringEnumConverter))]
-        public EGame UEVersion { get; set; } = EGame.GAME_UE5_5;
+        public EGame UEVersion { get; set; } = EGame.GAME_UE5_6;
     }
 }

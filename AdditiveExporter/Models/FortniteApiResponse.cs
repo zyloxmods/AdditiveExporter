@@ -2,36 +2,60 @@
 
 namespace AdditiveExporter.Models
 {
-    public class FortniteAPIResponse<T>
+    public class AESResponse
     {
-        [JsonProperty("status")]
-        public int Status { get; set; }
-
-        [JsonProperty("data")]
-        public T Data { get; set; }
-    }
-
-    public class AES
-    {
-        [JsonProperty("build")]
-        public string Build { get; set; }
-
+        [JsonProperty("version")]
+        public string Version { get; set; }
+        
         [JsonProperty("mainKey")]
         public string MainKey { get; set; }
-
+        
         [JsonProperty("dynamicKeys")]
-        public List<DynamicKey> DynamicKeys { get; set; }
+        public List<DynamicKeyInfo> DynamicKeys { get; set; } = new List<DynamicKeyInfo>();
     }
-
-    public class DynamicKey
+    
+    public class DynamicKeyInfo
     {
-        [JsonProperty("pakFilename")]
-        public string PakFilename { get; set; }
-
-        [JsonProperty("pakGuid")]
-        public string PakGuid { get; set; }
-
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        
+        [JsonProperty("guid")]
+        public string Guid { get; set; }
+        
         [JsonProperty("key")]
         public string Key { get; set; }
+    }
+    
+    public class MappingsResponse
+    {
+        [JsonProperty("url")]
+        public string Url { get; set; }
+
+        [JsonProperty("fileName")]
+        public string FileName { get; set; }
+
+        [JsonProperty("hash")]
+        public string Hash { get; set; }
+
+        [JsonProperty("length")]
+        public int Length { get; set; }
+
+        [JsonProperty("uploaded")]
+        public DateTime Uploaded { get; set; }
+
+        [JsonProperty("meta")]
+        public Meta Meta { get; set; }
+    }
+
+    public class Meta
+    {
+        [JsonProperty("version")]
+        public string Version { get; set; }
+
+        [JsonProperty("compressionMethod")]
+        public string CompressionMethod { get; set; }
+
+        [JsonProperty("platform")]
+        public string Platform { get; set; }
     }
 }

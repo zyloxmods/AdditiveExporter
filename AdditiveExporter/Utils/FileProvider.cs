@@ -137,8 +137,9 @@ namespace AdditiveExporter.Utils
 
             if (mappingsData == null)
             {
-                Logger.Log("Failed to fetch mappings. No data received from the API.", LogLevel.Cue4);
-                throw new Exception("Mappings data is null. Please check the API or try again later.");
+                String noMappings = "Mappings data is null. Please check the API or try again later.";
+                Logger.Log(noMappings, LogLevel.Cue4);
+                throw new Exception(noMappings);
             }
 
             var path = Path.Combine(Constants.DataPath, mappingsData.FileName);
@@ -146,7 +147,6 @@ namespace AdditiveExporter.Utils
             {
                 Logger.Log($"Cannot find latest mappings, Downloading {mappingsData.Url}", LogLevel.Cfg);
                 
-                // Use HttpClient instead of WebClient
                 byte[] mappingBytes = await HttpClient.GetByteArrayAsync(mappingsData.Url);
                 await File.WriteAllBytesAsync(path, mappingBytes);
             }
@@ -156,8 +156,9 @@ namespace AdditiveExporter.Utils
 
             if (latestUsmapInfo == null)
             {
-                Logger.Log("Could not find the downloaded mappings file.", LogLevel.Cue4);
-                throw new FileNotFoundException("Mappings file not found after download.");
+                String noMappings = "Mappings file not found after download.";
+                Logger.Log(noMappings, LogLevel.Cue4);
+                throw new FileNotFoundException(noMappings);
             }
 
             Logger.Log($"Mappings pulled from file: {latestUsmapInfo.Name}", LogLevel.Cue4);

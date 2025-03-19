@@ -27,7 +27,7 @@ namespace AdditiveExporter.Utils
                 LoadConfig();
                 var aes = JsonConvert
                     .DeserializeObject<FortniteAPIResponse<AES>>(
-                        await new HttpClient().GetStringAsync("https://fortnite-api.com/v2/aes"))
+                        await new HttpClient().GetStringAsync("https://fortnitecentral.genxgames.gg/api/v1/aes"))
                     ?.Data;
 
                 Provider = new DefaultFileProvider(FortniteUtils.PaksPath, SearchOption.TopDirectoryOnly, false,

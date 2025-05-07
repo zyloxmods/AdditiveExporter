@@ -13,7 +13,6 @@ namespace AdditiveExporter.Utils
         
         [JsonConverter(typeof(StringEnumConverter))]
         public EGame UEVersion { get; set; } = EGame.GAME_UE5_6;
-        public bool CloseAfterSingleExport { get; set; } = true;
         
     }
 }

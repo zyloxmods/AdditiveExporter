@@ -20,13 +20,10 @@ namespace AdditiveExporter
 
             await FileProvider.Init();
 
-            FileProvider.ExportAdditiveAnimation();
-            
-
-            for (int i = 3; i > 0; i--)
+            while (true)
             {
-                Logger.Log($"Closing in {i}");
-                await Task.Delay(1000);
+                FileProvider.ExportAdditiveAnimation();
+                Console.WriteLine();
             }
         }
     }

@@ -115,16 +115,8 @@ namespace AdditiveExporter.Utils
             var exporter = new AnimExporter(addUAnimSequence, exporterOptions);
             exporter.TryWriteToDir(new DirectoryInfo(Constants.ExportPath), out _, out var fileName);
             Logger.Log($"Exported to: {fileName}", LogLevel.Cue4);
-            if (_config!.CloseAfterSingleExport)
-            {
-                Logger.Log("Press any key to exit...");
-                Console.ReadKey();
-                return;
-            }
-            Logger.Log("Press any key to continue...");
-            Console.ReadKey();
-            Console.Clear();
-            ExportAdditiveAnimation();
+            Logger.Log("Ready for next export...");
+            Logger.Log("Press Ctrl+C to exit");
         }
 
         private static string EnsureCorrectPath(string inputPath)

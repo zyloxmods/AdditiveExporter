@@ -5,12 +5,15 @@ using Newtonsoft.Json.Converters;
 
 namespace AdditiveExporter.Utils
 {
+    
     public class Config
     {
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(StringEnumConverter))] 
         public EAnimFormat AnimFormat { get; set; } = EAnimFormat.UEFormat;
-
+        
         [JsonConverter(typeof(StringEnumConverter))]
         public EGame UEVersion { get; set; } = EGame.GAME_UE5_6;
+        public bool CloseAfterSingleExport { get; set; } = true;
+        
     }
 }

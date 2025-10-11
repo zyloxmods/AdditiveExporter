@@ -1,4 +1,5 @@
-﻿using CUE4Parse.Encryption.Aes;
+﻿﻿using System.Collections.Generic;
+using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
 using CUE4Parse.MappingsProvider;
 using CUE4Parse.UE4.Assets.Exports.Animation;
@@ -132,37 +133,64 @@ namespace AdditiveExporter.Utils
         
         private static async Task<FileUsmapTypeMappingsProvider> Mappings()
         {
-            var mappingsResponse = await HttpClient.GetStringAsync("https://fortnitecentral.genxgames.gg/api/v1/mappings");
-            var mappingsData = JsonConvert.DeserializeObject<List<MappingsResponse>>(mappingsResponse)?.FirstOrDefault();
-
-            if (mappingsData == null)
+            try
             {
-                String noMappings = "Mappings data is null. Please check the API or try again later.";
-                Logger.Log(noMappings, LogLevel.Cue4);
-                throw new Exception(noMappings);
+                const string uedbEndpoint = "https://uedb.dev/svc/api/v1/fortnite/mappings";
+                Logger.Log($"Attempting to fetch mappings from: {uedbEndpoint}", LogLevel.Cfg);
+                var response = await HttpClient.GetStringAsync(uedbEndpoint);
+                var mappingsData = JsonConvert.DeserializeObject<UEDBResponse>(response);
+                if (mappingsData?.Mappings?.ZStandard != null)
+                {
+                    var url = mappingsData.Mappings.ZStandard;
+                    var fileName = Path.GetFileName(url);
+                    return await DownloadAndLoadMappings(fileName, url, uedbEndpoint);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Failed to fetch from primary endpoint (uedb.dev): {ex.Message}", LogLevel.Info);
+            }
+            
+            try
+            {
+                const string dillyEndpoint = "https://export-service.dillyapis.com/v1/mappings";
+                Logger.Log($"Attempting to fetch mappings from fallback: {dillyEndpoint}", LogLevel.Cfg);
+                var response = await HttpClient.GetStringAsync(dillyEndpoint);
+                var mappingsData = JsonConvert.DeserializeObject<List<MappingsResponse>>(response)?.FirstOrDefault();
+                if (mappingsData != null)
+                {
+                    return await DownloadAndLoadMappings(mappingsData.FileName, mappingsData.Url, dillyEndpoint);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Failed to fetch from fallback endpoint (dillyapis): {ex.Message}", LogLevel.Error);
+            }
+            
+            var finalErrorMessage = "Failed to fetch mappings from all available endpoints.";
+            Logger.Log(finalErrorMessage, LogLevel.Error);
+            throw new Exception(finalErrorMessage);
+        }
+
+        private static async Task<FileUsmapTypeMappingsProvider> DownloadAndLoadMappings(string fileName, string url, string sourceEndpoint)
+        {
+            if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(url))
+            {
+                var error = $"Received invalid mappings data from {sourceEndpoint}.";
+                Logger.Log(error, LogLevel.Error);
+                throw new Exception(error);
             }
 
-            var path = Path.Combine(Constants.DataPath, mappingsData.FileName);
+            var path = Path.Combine(Constants.DataPath, fileName);
             if (!File.Exists(path))
             {
-                Logger.Log($"Cannot find latest mappings, Downloading {mappingsData.Url}", LogLevel.Cfg);
-                
-                byte[] mappingBytes = await HttpClient.GetByteArrayAsync(mappingsData.Url);
+                Logger.Log($"Cannot find latest mappings file '{fileName}', downloading from {url}", LogLevel.Cfg);
+                byte[] mappingBytes = await HttpClient.GetByteArrayAsync(url);
                 await File.WriteAllBytesAsync(path, mappingBytes);
             }
 
-            var latestUsmapInfo = new DirectoryInfo(Constants.DataPath).GetFiles("*.usmap")
-                .FirstOrDefault(x => x.Name == mappingsData.FileName);
-
-            if (latestUsmapInfo == null)
-            {
-                String noMappings = "Mappings file not found after download.";
-                Logger.Log(noMappings, LogLevel.Cue4);
-                throw new FileNotFoundException(noMappings);
-            }
-
-            Logger.Log($"Mappings pulled from file: {latestUsmapInfo.Name}", LogLevel.Cue4);
-            return new FileUsmapTypeMappingsProvider(latestUsmapInfo.FullName);
+            Logger.Log($"Mappings pulled from file: {fileName}", LogLevel.Cue4);
+            return new FileUsmapTypeMappingsProvider(path);
         }
     }
 }

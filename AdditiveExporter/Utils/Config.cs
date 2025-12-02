@@ -12,6 +12,6 @@ namespace AdditiveExporter.Utils
         public EAnimFormat AnimFormat { get; set; } = EAnimFormat.UEFormat;
         
         [JsonConverter(typeof(StringEnumConverter))]
-        public EGame UEVersion { get; set; } = EGame.GAME_UE5_7;
+        public EGame UEVersion { get; set; } = EGame.GAME_UE5_8;
     }
 }

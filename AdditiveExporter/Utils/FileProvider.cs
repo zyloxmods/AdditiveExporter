@@ -1,4 +1,4 @@
-﻿﻿using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
 using CUE4Parse.MappingsProvider;
@@ -25,7 +25,8 @@ namespace AdditiveExporter.Utils
             try
             {
                 LoadConfig();
-                string aesResponse = await HttpClient.GetStringAsync("https://fortnitecentral.genxgames.gg/api/v1/aes");
+                var aesOverride = _config.AesKeyOverride != null ? $"?version={_config.AesKeyOverride}" : ""; 
+                string aesResponse = await HttpClient.GetStringAsync($"https://fortnitecentral.genxgames.gg/api/v1/aes{aesOverride}"); // this should probably be replaced with uedb soon
                 var aesData = JsonConvert.DeserializeObject<AESResponse>(aesResponse);
 
                 if (aesData == null)
@@ -34,9 +35,10 @@ namespace AdditiveExporter.Utils
                     return;
                 }
                 var version = new VersionContainer(_config!.UEVersion);
-                Provider = new DefaultFileProvider(FortniteUtils.PaksPath, SearchOption.TopDirectoryOnly, version);
+                var gameOverride = string.IsNullOrEmpty(_config.GamePathOverride) ? FortniteUtils.PaksPath : _config.GamePathOverride;
+                Provider = new DefaultFileProvider(gameOverride, SearchOption.TopDirectoryOnly, version); 
                 Provider.Initialize();
-                Logger.Log($"File provider initialized with at {FortniteUtils.PaksPath} with {_config.UEVersion}", LogLevel.Cfg);
+                Logger.Log($"File provider initialized with at {gameOverride} with {_config.UEVersion}", LogLevel.Cfg);
                 
                 var keys = new List<KeyValuePair<FGuid, FAesKey>>
                 {
@@ -133,6 +135,17 @@ namespace AdditiveExporter.Utils
         
         private static async Task<FileUsmapTypeMappingsProvider> Mappings()
         {
+            if (_config.MappingsOverride != string.Empty)
+            {
+                try
+                {
+                    return await DownloadAndLoadMappings(Path.GetFileName(_config.MappingsOverride), _config.MappingsOverride, "Mappings Override");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Failed to fetch from overriden provider: {ex.Message}", LogLevel.Info);
+                }
+            }
             try
             {
                 const string uedbEndpoint = "https://uedb.dev/svc/api/v1/fortnite/mappings";

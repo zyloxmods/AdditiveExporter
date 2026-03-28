@@ -13,5 +13,11 @@ namespace AdditiveExporter.Utils
         
         [JsonConverter(typeof(StringEnumConverter))]
         public EGame UEVersion { get; set; } = EGame.GAME_UE5_8;
+        
+        public string GamePathOverride { get; set; } = "";
+        
+        public string AesKeyOverride { get; set; } = "";
+        
+        public string MappingsOverride { get; set; } = "";
     }
 }

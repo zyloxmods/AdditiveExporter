@@ -26,7 +26,7 @@ namespace AdditiveExporter.Utils
             {
                 LoadConfig();
                 var aesOverride = _config.AesKeyOverride != null ? $"?version={_config.AesKeyOverride}" : ""; 
-                string aesResponse = await HttpClient.GetStringAsync($"https://fortnitecentral.genxgames.gg/api/v1/aes{aesOverride}"); // this should probably be replaced with uedb soon
+                string aesResponse = await HttpClient.GetStringAsync($"https://api.fortniteapi.com/v1/aes{aesOverride}"); // this should probably be replaced with uedb soon
                 var aesData = JsonConvert.DeserializeObject<AESResponse>(aesResponse);
 
                 if (aesData == null)
@@ -54,14 +54,14 @@ namespace AdditiveExporter.Utils
                 Logger.Log($"Loaded {Provider.Keys.Count} keys", LogLevel.Cue4);
                 Logger.Log($"AnimFormat set to {_config.AnimFormat}", LogLevel.Cfg);
 
-                var oodlePath = Path.Combine(Constants.DataPath, OodleHelper.OODLE_DLL_NAME);
-                if (File.Exists(OodleHelper.OODLE_DLL_NAME))
+                var oodlePath = Path.Combine(Constants.DataPath, OodleHelper.OODLE_NAME_OLD);
+                if (File.Exists(OodleHelper.OODLE_NAME_OLD))
                 {
-                    File.Move(OodleHelper.OODLE_DLL_NAME, oodlePath, true);
+                    File.Move(OodleHelper.OODLE_NAME_OLD, oodlePath, true);
                 }
                 else if (!File.Exists(oodlePath))
                 {
-                    await OodleHelper.DownloadOodleDllAsync(oodlePath);
+                    await OodleHelper.DownloadOodleDllAsync(ref oodlePath);
                 }
 
                 OodleHelper.Initialize(oodlePath);

@@ -2,6 +2,7 @@
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
 using CUE4Parse.MappingsProvider;
+using CUE4Parse.MappingsProvider.Usmap;
 using CUE4Parse.UE4.Assets.Exports.Animation;
 using CUE4Parse.UE4.Assets;
 using CUE4Parse.UE4.Objects.Core.Misc;
@@ -10,6 +11,8 @@ using Newtonsoft.Json;
 using AdditiveExporter.Models;
 using CUE4Parse_Conversion;
 using CUE4Parse_Conversion.Animations;
+using CUE4Parse_Conversion.Exporters;   // new: AnimationExporter
+using CUE4Parse_Conversion.Options;     // new: ExportOptions, EMeshFormat
 using CUE4Parse.Compression;
 
 namespace AdditiveExporter.Utils
@@ -25,7 +28,7 @@ namespace AdditiveExporter.Utils
             try
             {
                 LoadConfig();
-                var aesOverride = _config.AesKeyOverride != null ? $"?version={_config.AesKeyOverride}" : ""; 
+                var aesOverride = !string.IsNullOrEmpty(_config.AesKeyOverride) ? $"?version={_config.AesKeyOverride}" : "";
                 string aesResponse = await HttpClient.GetStringAsync($"https://api.fortniteapi.com/v1/aes{aesOverride}"); // this should probably be replaced with uedb soon
                 var aesData = JsonConvert.DeserializeObject<AESResponse>(aesResponse);
 
@@ -47,7 +50,7 @@ namespace AdditiveExporter.Utils
                 
                 foreach (var dynamicKey in aesData.DynamicKeys)
                 {
-                    keys.Add(new KeyValuePair<FGuid, FAesKey>(new FGuid(dynamicKey.Guid), new FAesKey(dynamicKey.Key)));
+                    keys.Add(new KeyValuePair<FGuid, FAesKey>(new FGuid("3BDD161AE537C5AB57A1FEDAFF9A7950"), new FAesKey("0x8CA25114E59A19982B65C5E846B9F5488E7B29C1E3561E10CA353638165696A2")));
                 }
                 
                 await Provider.SubmitKeysAsync(keys);
@@ -97,7 +100,7 @@ namespace AdditiveExporter.Utils
             }
         }
 
-        public static void ExportAdditiveAnimation()
+        public static async Task ExportAdditiveAnimation()
         {
             Logger.Log("Enter the path to the Additive Pose:", LogLevel.Cue4);
             string additivePose = Console.ReadLine() ?? string.Empty;
@@ -111,13 +114,15 @@ namespace AdditiveExporter.Utils
             var refUAnimSequence = Provider.LoadPackageObject<UAnimSequence>(refPose);
 
             addUAnimSequence.RefPoseSeq = new ResolvedLoadedObject(refUAnimSequence);
-            var exporterOptions = new ExporterOptions()
-            {
-                AnimFormat = _config!.AnimFormat
-            };
-            var exporter = new AnimExporter(addUAnimSequence, exporterOptions);
-            exporter.TryWriteToDir(new DirectoryInfo(Constants.ExportPath), out _, out var fileName);
-            Logger.Log($"Exported to: {fileName}", LogLevel.Cue4);
+
+            var options = new ExportOptions(meshFormat: _config!.AnimFormat);
+            var session = new ExportSession();
+            session.Add(new AnimationExporter(addUAnimSequence));
+
+            var results = await session.RunAsync(Constants.ExportPath, options);
+            foreach (var result in results)
+                Logger.Log($"Export result: {result}", LogLevel.Cue4);
+
             Logger.Log("Ready for next export...");
             Logger.Log("Press Ctrl+C to exit");
         }
